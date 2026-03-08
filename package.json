@@ -4,7 +4,8 @@
   "description": "Stremio addon for Czech and Slovak subtitles from Titulky.com",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "NODE_ENV=development node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -17,5 +18,6 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "packageManager": "pnpm@10.20.0"
 }
