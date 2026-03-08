@@ -17,6 +17,7 @@ const logRD = makeLogger("RD");
 
 const app = express();
 const PORT = process.env.PORT || 3100;
+const PUBLIC_URL = isDev ? null : "http://61ab9c85a149-stremio-titulky-com.baby-beamup.club";
 
 // ── R2 Cloud Cache ───────────────────────────────────────────────
 const r2Enabled = !!(
@@ -383,13 +384,13 @@ app.use((req, res, next) => {
 app.get("/", (req, res) => res.redirect("/configure"));
 
 app.get("/configure", (req, res) => {
-  const host = `${req.protocol}://${req.get("host")}`;
+  const host = PUBLIC_URL || `${req.protocol}://${req.get("host")}`;
   res.type("html").send(getConfigurePage(host));
 });
 
 // Stremio requests /:config/configure after reading manifest
 app.get("/:config/configure", (req, res) => {
-  const host = `${req.protocol}://${req.get("host")}`;
+  const host = PUBLIC_URL || `${req.protocol}://${req.get("host")}`;
   res.type("html").send(getConfigurePage(host));
 });
 
@@ -416,7 +417,7 @@ function getManifest(config, host) {
 app.get("/:config/manifest.json", (req, res) => {
   const config = decodeConfig(req.params.config);
   if (!config) return res.status(400).json({ error: "Invalid config" });
-  const host = `${req.protocol}://${req.get("host")}`;
+  const host = PUBLIC_URL || `${req.protocol}://${req.get("host")}`;
   res.json(getManifest(config, host));
 });
 
@@ -427,7 +428,7 @@ app.get("/:config/subtitles/:type/:id/:extra?.json", async (req, res) => {
   if (!config) return res.status(400).json({ subtitles: [] });
 
   const { type, id } = req.params;
-  const host = `${req.protocol}://${req.get("host")}`;
+  const host = PUBLIC_URL || `${req.protocol}://${req.get("host")}`;
 
   try {
     const client = await getClient(config);
@@ -1154,7 +1155,7 @@ app.get("/custom-sub-raw/:imdbId/:filename", async (req, res) => {
 app.get("/:config/dashboard", async (req, res) => {
   const config = decodeConfig(req.params.config);
   if (!config || !config.username) return res.status(401).send("Not logged in");
-  const host = `${req.protocol}://${req.get("host")}`;
+  const host = PUBLIC_URL || `${req.protocol}://${req.get("host")}`;
   const history = await r2GetHistory(config.username);
   res.type("html").send(getDashboardPage(host, config, history, req.params.config));
 });
@@ -1989,7 +1990,7 @@ function getDashboardPage(host, config, history, configStr) {
     <label for="subLang">Jazyk</label>
     <select id="subLang">
       <option value="cze">Čeština</option>
-      <option value="slk">Slovenčina</option>
+      <option value="slo">Slovenčina</option>
       <option value="eng">Angličtina</option>
     </select>
 
@@ -2037,7 +2038,7 @@ function renderExistingSubs(subs) {
       <div class="existing-sub" id="sub-\${btoa(s.key).replace(/[^a-zA-Z0-9]/g,'')}">
         <div class="existing-sub-info">
           <span class="existing-sub-name">\${s.label}</span>
-          <span class="existing-sub-meta">\${s.filename} · \${s.lang === 'cze' ? 'CZ' : s.lang === 'slk' ? 'SK' : s.lang.toUpperCase()}\${uploaderText}</span>
+          <span class="existing-sub-meta">\${s.filename} · \${s.lang === 'cze' ? 'CZ' : s.lang === 'slo' ? 'SK' : s.lang.toUpperCase()}\${uploaderText}</span>
         </div>
         \${canDelete ? '<button class="btn-delete" onclick="deleteSub(\\'' + s.key.replace(/'/g, "\\\\\\\\'") + '\\', this)" title="Smazat">🗑</button>' : ''}
       </div>
